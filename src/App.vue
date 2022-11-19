@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div class="cryptos">
-      <div class="card" v-for="(crypto, i) in cryptos" :key="i">
+      <div class="card" v-for="(crypto, i) in cryptos" :key="i" @click="viewchart(i)">
         <img :src="crypto.image">
         <div class="card-body">
           <p class="card-text" style="text-align:center"> ${{(crypto.prix)}}</p>
@@ -11,13 +11,51 @@
       </div>
     </div>
     <div class="graphique">
-      Graphyque 
+      <v-chart class="chart" :option="option" />
     </div>
   </div>
 </template>
 
 <script>
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import { PieChart } from "echarts/charts";
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent
+} from "echarts/components";
+import VChart, { THEME_KEY } from "vue-echarts";
+
+use([
+  CanvasRenderer, // rendre visible le graphique
+  PieChart,
+  TitleComponent, // titre du grapgique : tittle
+  TooltipComponent, // voi les tooltips: bulle avec infos
+  LegendComponent // voir la légende
+]);
+
+// ECharts.setOption({option: Object, notMerge: boolean, lazyUpdate: boolean})
+/**
+ * Transformer timestamp en date : new Date(1668866503000).toLocaleDateString()
+ * Transofmer date en timestamp : 
+ * */
 export default {
+  components: {
+    VChart
+  },
+  provide: {
+    [THEME_KEY]: "dark"
+  },
+  mounted() {
+    // fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=2&interval=hourly")
+    //   .then(res => {
+    //     console.log(res.json());
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //   })
+  },
   data() {
     return {
       cryptos : [
@@ -30,8 +68,51 @@ export default {
         { nom: 'Polygon', prix: 586.45, image: require('../images/polygon.png'),min:575, max:642 },
         { nom: 'Vechain', prix: 86.45, image: require('../images/vechain.png'),min:75, max:89 },
       ],
+      option : {
+      title: {
+        text: "Traffic Sources",
+        left: "center"
+      },
+      tooltip: {
+        trigger: "item",
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+      },
+      legend: {
+        orient: "vertical",
+        left: "right",
+        data: ["Direct", "Email", "Ad Networks", "Video Ads", "Search Engines"]
+      },
+      series: [
+        {
+          name: "Traffic Sources",
+          type: "pie",
+          radius: "55%",
+          center: ["50%", "60%"],
+          data: [
+            { value: 335, name: "Direct" },
+            { value: 310, name: "Email" },
+            { value: 234, name: "Ad Networks" },
+            { value: 135, name: "Video Ads" },
+            { value: 1548, name: "Search Engines" }
+          ],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: "rgba(0, 0, 0, 0.5)"
+            }
+          }
+        }
+      ]
+    }
     }
   },
+  methods: {
+    viewchart(cryptoIndex) {
+      console.log('appui pour voir graphique ', this.cryptos[cryptoIndex])
+    }
+  },
+ 
 
   name: 'App'
 }
@@ -69,6 +150,9 @@ export default {
   margin-top:30px;
   height: 120px;
 }
+.cryptos .card:hover {
+  cursor: pointer;
+}
 
 .cryptos .card img {
   width: 64px;
@@ -96,5 +180,9 @@ export default {
   left: 0;
   right: 0;
   height: auto ;
+}
+
+.chart {
+  height: 400px;
 }
 </style>
