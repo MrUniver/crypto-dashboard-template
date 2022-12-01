@@ -1,154 +1,182 @@
 <template>
-  <div id="app">
+  <div id="content">
+    <section class="params" v-show="graphOpen===true">
+      <select name="interval" id="interval" @change="changeInterval($event)" required>
+        <option aria-readonly>Selectionne l'intervalle</option>
+        <option value="hourly">Heure</option>
+        <option value="daily">Journée</option>
+      </select>
+
+      <select name="days" id="days" @change="changeDays($event)" required v-model="days">
+        <option readonly>Selectionne le nombre de jours</option>
+        <option :value="i" v-for="i in 100" :key="i">{{i}}</option>
+      </select>
+    </section>
+
     <div class="cryptos">
       <div class="card" v-for="(crypto, i) in cryptos" :key="i" @click="viewchart(i)">
         <img :src="crypto.image">
         <div class="card-body">
-          <p class="card-text" style="text-align:center"> ${{(crypto.prix)}}</p>
-          <span style="float:left"><img src="../images/diminuer.png" style="width:24px; height:24px"> $ {{crypto.min}}</span>
-          <span style="float:right"><img src="../images/augmenter.png" style="width:24px; height:24px"> $ {{crypto.max}} </span>
+          <p class="card-text" style="text-align:center"> ${{(crypto.current_price)}}</p>
+          <span style="float:left"><img src="../images/diminuer.png" style="width:24px; height:24px">  ${{crypto.low_24h}}</span>
+          <span style="float:right"><img src="../images/augmenter.png" style="width:24px; height:24px">  ${{crypto.high_24h}} </span>
         </div>
       </div>
     </div>
-    <div class="graphique">
-      <v-chart class="chart" :option="option" />
+
+  </div>
+
+  <!-- Partie avec graphique -->
+  <div id="graph">
+    <div class="graph__close__open" @click.prevent.capture="open_or_close">
+      <svg id="more-arrows">
+        <polygon class="arrow-top" points="37.6,27.9 1.8,1.3 3.3,0 37.6,25.3 71.9,0 73.7,1.3 "/>
+        <polygon class="arrow-middle" points="37.6,45.8 0.8,18.7 4.4,16.4 37.6,41.2 71.2,16.4 74.5,18.7 "/>
+        <polygon class="arrow-bottom" points="37.6,64 0,36.1 5.1,32.8 37.6,56.8 70.4,32.8 75.5,36.1 "/>
+      </svg>
+    </div>
+    <div class="grap__show">
+      <!-- <Line :chartData="chartData" :title="title" :graphOpen="graphOpen" :chartOptions="chartOptions" :changeData="changeData"/> -->
+      <canvas id="canvas" class="canvas" width="10" height="3"></canvas>
     </div>
   </div>
 </template>
 
 <script>
-import { use } from "echarts/core";
-import { CanvasRenderer } from "echarts/renderers";
-import { PieChart } from "echarts/charts";
-import {
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent
-} from "echarts/components";
-import VChart, { THEME_KEY } from "vue-echarts";
+import { Chart } from 'chart.js/auto'
 
-use([
-  CanvasRenderer, // rendre visible le graphique
-  PieChart,
-  TitleComponent, // titre du grapgique : tittle
-  TooltipComponent, // voi les tooltips: bulle avec infos
-  LegendComponent // voir la légende
-]);
 
-// ECharts.setOption({option: Object, notMerge: boolean, lazyUpdate: boolean})
-/**
- * Transformer timestamp en date : new Date(1668866503000).toLocaleDateString()
- * Transofmer date en timestamp : 
- * */
 export default {
-  components: {
-    VChart
+
+  async mounted() {
+    let rep = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${this.cryptocurrencies.join()}&order=market_cap_desc&per_page=100&page=1&sparkline=false`)
+    this.cryptos = await rep.json()
+    console.log("hhelo");
   },
-  provide: {
-    [THEME_KEY]: "dark"
-  },
-  mounted() {
-    // fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=2&interval=hourly")
-    //   .then(res => {
-    //     console.log(res.json());
-    //   })
-    //   .catch(err => {
-    //     console.log(err);
-    //   })
-  },
+
   data() {
     return {
-      cryptos : [
-        { nom: 'Bitcoin', prix: 16986.45, image: require('../images/bitcoin.png'), min:16500, max:17606 },
-        { nom: 'Ethereum', prix: 36986.45, image: require('../images/ethereum.png'), min:33487, max:34892 },
-        { nom: 'Ripple', prix: 19986.45, image: require('../images/ripple.png'),min:12345, max:23606 },
-        { nom: 'Near', prix: 3686.45, image: require('../images/near.png'), min:3567, max:3864},
-        { nom: 'Solana', prix: 186.45, image: require('../images/solana.png'),min:175, max:235 },
-        { nom: 'Litecoin', prix: 1586.45, image: require('../images/litecoin.png'),min:1575, max:2035 },
-        { nom: 'Polygon', prix: 586.45, image: require('../images/polygon.png'),min:575, max:642 },
-        { nom: 'Vechain', prix: 86.45, image: require('../images/vechain.png'),min:75, max:89 },
-      ],
-      option : {
-      title: {
-        text: "Traffic Sources",
-        left: "center"
+      days: "Selectionne le nombre de jours",
+      graphOpen: false,
+      selects: {
+        days: 1,
+        intervale: "daily"
       },
-      tooltip: {
-        trigger: "item",
-        formatter: "{a} <br/>{b} : {c} ({d}%)"
-      },
-      legend: {
-        orient: "vertical",
-        left: "right",
-        data: ["Direct", "Email", "Ad Networks", "Video Ads", "Search Engines"]
-      },
-      series: [
-        {
-          name: "Traffic Sources",
-          type: "pie",
-          radius: "55%",
-          center: ["50%", "60%"],
-          data: [
-            { value: 335, name: "Direct" },
-            { value: 310, name: "Email" },
-            { value: 234, name: "Ad Networks" },
-            { value: 135, name: "Video Ads" },
-            { value: 1548, name: "Search Engines" }
-          ],
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: "rgba(0, 0, 0, 0.5)"
-            }
-          }
-        }
+      chart: null,
+      cryptos: [],
+      cryptocurrencies :[
+          'ethereum', 
+          'bitcoin', 
+          'ripple',
+          'cardano',
+          'litecoin', 
+          'solana',
+          'near', 
+          'apecoin',
+          'shiba-inu',
+          'vechain',
+          'decentraland',
+          'cosmos',
+          'dogecoin'
       ]
     }
-    }
   },
-  methods: {
-    viewchart(cryptoIndex) {
-      console.log('appui pour voir graphique ', this.cryptos[cryptoIndex])
-    }
-  },
- 
 
-  name: 'App'
+
+  methods: {
+
+    viewchart() {
+      console.log("yes");
+    },
+
+    open_or_close() {
+
+      const graph = document.querySelector('#graph')
+      const close = graph.childNodes[0]
+      if(this.graphOpen) {
+        // document.querySelector('.params').style.display = "none"
+        close.style.transform = 'scale(-0.8)'
+        graph.style.height = "0"
+        graph.style.border = 'none'
+        this.graphOpen = false
+      } else {
+        // document.querySelector('.params').style.display = "flex"
+        close.style.transform = 'scale(0.8)'
+        graph.style.height = "600px"
+        graph.style.border = '1px solid grey'
+        this.graphOpen = true
+      }
+    },
+
+
+  },
+
+  name: 'App',
+
 }
 </script>
 
 <style>
 
 
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  border-radius: 3px;
-  position: relative;
-  width: 90vw;
-  margin: 70px 70px auto auto;
+body {
+  overflow: hidden;
+}
+
+*, ::after, ::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  border:0;
+}
+
+#content {
   height: 90vh;
+  width: 98%;
+  position: relative;
+  margin: 70px auto;
+}
+
+.params {
+  text-align: right;
+  width: 96%;
+  height: 60px;
+  margin: 0 auto;
+  position: absolute;
+  align-content: center;
+  justify-content: flex-end;
+  transition: all 2s;
+  display: none;
+}
+
+.params select {
+  font-weight: 900;
+  cursor: pointer;
+  border:1px solid rgb(160, 158, 158);
+  border-radius: 3px;
+  margin-left: 10px;
+  height: 30px;
 }
 
 .cryptos {
-  position: absolute;
+  overflow-y: auto;
+  position: relative;
+  max-height: 580px;
   right: 0;
   left: 0;
-  top:0;
+  top:40px;
   display: grid;
-  grid-template-columns: repeat(6, 15.5%);
-  gap:1.4%;
-  padding: 5px;
-  width: 100%;
-  border:2px solid orange;
+  grid-template-columns: repeat(auto-fit,  280px);
+  gap:10px;
+  justify-content: center;
+  padding: 10px;
 }
 
 .cryptos .card {
+  float: left;
   margin-top:30px;
-  height: 120px;
+  height: 140px;
+  border:2px solid rgb(194, 193, 193);
 }
 .cryptos .card:hover {
   cursor: pointer;
@@ -166,23 +194,54 @@ export default {
 }
 
 .cryptos .card .card-body p {
-  font-weight: 900;
+  font-weight: 700;
 }
 .cryptos .card .card-body span {
-  font-weight: 600;
+  font-weight: 400;
 }
 
 
-.graphique {
-  border:3px solid red;
+#graph {
+  display: flex;
   position: absolute;
-  bottom:10px;
+  bottom:0px;
   left: 0;
   right: 0;
-  height: auto ;
+  height:0 ;
+  width: 100%;
+  margin:0 auto;
+  background-color: white;
+  justify-content: center;
+  transition: height 1s;
+  border-radius: 5px 5px  0 0;
 }
 
-.chart {
-  height: 400px;
+#graph .graph__close__open {
+  transform: scale(-0.8);
+  height: 70px;
+  width: 80px;
+  border:2px solid grey;
+  background-color: whitesmoke;
+  text-align: center;
+  line-height: 50px;
+  position: absolute;
+  top:-40px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: transform 1s;
+  opacity: .2;
 }
+
+#graph .graph__close__open:hover{
+  opacity: 1;
+}
+
+#graph .grap__show {
+  height: 500px;
+  width: 99.5%;
+  margin-top: 100px;
+  font-weight: 900;
+  opacity:.9;
+}
+
 </style>
