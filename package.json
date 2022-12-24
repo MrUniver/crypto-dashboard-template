@@ -7,10 +7,10 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "apexcharts": "^3.36.3",
     "core-js": "^3.8.3",
-    "echarts": "^5.4.0",
     "vue": "^3.2.13",
-    "vue-echarts": "^6.2.3",
+    "vue3-apexcharts": "^1.4.1",
     "vuex": "^4.0.0"
   },
   "devDependencies": {
