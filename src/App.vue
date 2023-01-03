@@ -39,86 +39,77 @@ export default {
 </script>
 
 <style>
-html,
+
 body {
-  height: 100vh;
-  width: 100vw;
-  font-family: "'JetBrains Mono', consolas, sans-serif", ;
   overflow: hidden;
+  font-family: "'JetBrains Mono', consolas, sans-serif", ;
 }
 
-*,
-::after,
-::before {
+*, ::after, ::before {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  border: 0;
+  border:0;
 }
 
-/* Partie qui englobe le tout */
 
+/* Partie qui englobe le tout */
 #content {
-  overflow-y: auto;
   height: 90vh;
   width: 98%;
   position: relative;
-  top: 60px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 60px auto;
 }
 
 
 /* Partie qui affiche les 2 selects */
-
 .params {
+  z-index: 2;
+  text-align: right;
   width: 96%;
-  height: 50px;
-  position: fixed;
-  justify-content: end;
+  padding: 5px;
+  margin: 0 auto;
+  position: absolute;
+  top:5px;
+  right: 0;
+  left: 0;
+  align-content: center;
+  justify-content: flex-end;
   transition: all 2s;
   display: none;
-  align-items: center;
-  padding: 5px;
 }
 
 .params select {
   font-weight: 900;
   cursor: pointer;
-  border: 1px solid rgb(160, 158, 158);
+  border:1px solid rgb(160, 158, 158);
   border-radius: 3px;
-  margin-right: 10px;
+  margin-left: 10px;
   height: 30px;
-}
-
-.params label {
-  font-weight: 900;
-  margin-left: 40px;
-
-  padding: 10px;
 }
 
 
 /* Partie qui affiche les cartes avec les infos des cryptos */
-
 .cryptos {
+  overflow-y: auto;
   position: relative;
+  max-height: 880px;
   right: 0;
   left: 0;
-  top: 50px;
+  top:0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, 280px);
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit,  280px);
+  gap:10px;
   justify-content: center;
-  padding: 10px;
+  padding: 40px 10px;
 }
 
 .cryptos .card {
-  margin-top: 30px;
-  height: 150px;
-  border: 2px solid rgb(194, 193, 193);
+  float: left;
+  margin-top:30px;
+  height: 140px;
+  border:2px solid rgb(194, 193, 193);
 }
-
 .cryptos .card:hover {
   cursor: pointer;
 }
@@ -126,9 +117,8 @@ body {
 .cryptos .card img {
   width: 64px;
   height: 64px;
-  margin: -38px auto;
-  border: none;
-  border-radius: 50%;
+  margin:-32px auto;
+  border:none;
 }
 
 .cryptos .card .card-body {
@@ -138,72 +128,51 @@ body {
 .cryptos .card .card-body p {
   font-weight: 700;
 }
-
 .cryptos .card .card-body span {
   font-weight: 400;
 }
 
-.cryptos .card .card-body p:last-child {
-  color: rgb(96, 95, 95);
-  font-size: 10px;
-  width: 100%;
-  text-align: center;
-  position: absolute;
-  left: 0;
-  bottom: -5px;
-  right: 0;
-  font-style: italic;
-}
-
 
 /* Partie qui affichie le graphique */
-
 #graph {
-  height: 0;
+  display: flex;
   position: absolute;
+  bottom:0px;
   left: 0;
   right: 0;
+  height:0 ;
+  width: 100%;
+  margin:0 auto;
   background-color: white;
-  opacity: 0.95;
-  bottom: 0;
-  display: block;
-  justify-content: left;
+  justify-content: center;
   transition: height 1s;
-  border-radius: 5px 5px 0 0;
-  text-align: center;
-  padding: 10px;
+  border-radius: 5px 5px  0 0;
 }
 
-#graph .graph-close-open {
+#graph .graph__close-open {
   transform: scale(-0.8);
   height: 70px;
   width: 80px;
-  border: 2px solid grey;
+  border:2px solid grey;
   background-color: whitesmoke;
+  text-align: center;
   line-height: 50px;
-  position: relative;
-  bottom: 35px;
+  position: absolute;
+  top:-40px;
   border-radius: 3px;
   cursor: pointer;
   transition: transform 1s;
-  opacity: 0.2;
-  left: 47%;
+  opacity: .2;
 }
 
-#graph .graph-close-open:hover {
+#graph .graph__close-open:hover{
   opacity: 1;
 }
 
 #graph .grap__show {
-  width: 98%;
-  margin: 0 auto;
-  position: absolute;
-  left: 0;
-  right: 0;
-}
-
-#graph #canvas {
-  margin: 0 auto;
-  height: 100%;
+  width: 99.5%;
+  margin-top: 100px;
+  font-weight: 900;
+  opacity:.9;
 }
 </style>
